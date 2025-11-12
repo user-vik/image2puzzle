@@ -1,7 +1,7 @@
 # image2puzzle - Project Context for GitHub Copilot
 
 ## Project Overview
-An interactive puzzle game built with vanilla JavaScript, HTML5 Canvas, and Vite. Users can upload any image and solve it as a puzzle with realistic interlocking jigsaw pieces.
+An interactive puzzle game built with vanilla JavaScript, HTML5 Canvas, and Vite. Users can upload any image and solve it as a puzzle with realistic interlocking jigsaw pieces featuring authentic "shoulders and head" bezier curve designs with multiple pattern variations.
 
 ## Tech Stack
 - **Frontend**: Vanilla JavaScript (ES6 modules)
@@ -61,17 +61,19 @@ image2puzzle/
 ### pieces.js (PuzzlePiece)
 - **Purpose**: Individual puzzle piece representation and rendering
 - **Responsibilities**:
-  - Jigsaw piece shape generation with bezier curves
+  - Jigsaw piece shape generation with realistic "shoulders and head" bezier curves (6 curves per edge)
+  - Four distinct tab/blank pattern variations for natural diversity
   - Tab/blank configuration (interlocking design)
-  - Offscreen canvas pre-rendering for performance
+  - Offscreen canvas pre-rendering for performance with separate X/Y scale factors
   - Path2D caching for collision detection
   - Position management (current vs correct position)
   - Snap logic (threshold-based positioning)
   - Neighbor detection (top, right, bottom, left)
   - Edge piece identification
   - Visual states (dragging, placed, near-position highlighting)
-  - Image clipping to piece shape
+  - Image clipping to piece shape with proper aspect ratio handling
   - Shadow effects and outline rendering
+  - Gap-free image rendering through expanded tab regions
 
 ## Key Features
 
@@ -119,7 +121,24 @@ image2puzzle/
 - Tab direction is coordinated between neighboring pieces (one tab = opposite blank)
 - Edge pieces have null tabs (straight edges)
 - Tab size is 20% of piece dimensions
-- Bezier curves create smooth, realistic jigsaw shapes
+- **Realistic "Shoulders and Head" Design**:
+  - Each tab/blank edge uses 6 bezier curves (not simple arcs)
+  - Creates authentic jigsaw piece shape with shoulders, neck, and head structure
+  - Control points carefully designed for professional puzzle appearance
+- **Four Pattern Variations**:
+  - Pattern 1: Classic shoulders and head (balanced proportions)
+  - Pattern 2: Wider base with broader shoulders
+  - Pattern 3: Narrow neck with more pronounced head
+  - Pattern 4: Rounded with smoother curves
+  - Each piece side randomly selects one of 4 patterns for natural diversity
+- **Guaranteed Special Piece**:
+  - At least one interior piece guaranteed to have all 4 sides as inward blanks (quadruple blank piece)
+  - Creates a unique "carved out" piece surrounded by tabs
+  - Adds variety and visual interest to the puzzle
+- **Gap-Free Image Rendering**:
+  - Tab regions expand into neighboring piece image areas
+  - Separate X/Y scale factors preserve aspect ratios
+  - Completed puzzle displays seamlessly without gaps or misalignment
 
 ### Snap Logic Rules
 A piece can snap to its correct position when:
@@ -157,14 +176,19 @@ npm run preview   # Preview production build
 - Requires Canvas API support
 
 ## Current State
-- Fully functional puzzle game
-- All difficulty levels working
+- Fully functional puzzle game with professional-quality piece shapes
+- All difficulty levels working (3×3 to 6×6)
+- Realistic jigsaw pieces with "shoulders and head" bezier curve design
+- Four pattern variations creating natural puzzle piece diversity
+- Guaranteed quadruple inward blank piece for unique challenge
+- Gap-free image rendering with perfect alignment when completed
 - Snap logic with neighbor validation implemented
-- Pan/zoom navigation working
+- Pan/zoom navigation working smoothly
 - Timer and progress tracking active
 - Victory detection and modal display
-- Touch support enabled
-- Keyboard shortcuts functional
+- Touch support enabled for tablets/mobile
+- Keyboard shortcuts functional (Space, F, R)
+- Clean white text styling throughout UI
 
 ## Known Behavior
 - First piece can be placed anywhere (no neighbor requirement)
