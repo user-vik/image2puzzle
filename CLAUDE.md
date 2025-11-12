@@ -3,6 +3,8 @@
 ## Project Overview
 An interactive puzzle game built with vanilla JavaScript, HTML5 Canvas, and Vite. Users can upload any image and solve it as a puzzle with realistic interlocking jigsaw pieces featuring authentic "shoulders and head" bezier curve designs with multiple pattern variations.
 
+**Status**: 🚧 In Development - Core functionality working but several issues need resolution before production deployment.
+
 ## Tech Stack
 - **Frontend**: Vanilla JavaScript (ES6 modules)
 - **Canvas**: HTML5 Canvas API for rendering
@@ -73,7 +75,7 @@ image2puzzle/
   - Visual states (dragging, placed, near-position highlighting)
   - Image clipping to piece shape with proper aspect ratio handling
   - Shadow effects and outline rendering
-  - Gap-free image rendering through expanded tab regions
+  - Image rendering (⚠️ ISSUE: Not covering full piece area - gaps in tabs/blanks)
 
 ## Key Features
 
@@ -85,10 +87,11 @@ image2puzzle/
    - Hard (5×5 = 25 pieces)
    - Expert (6×6 = 36 pieces)
 3. **Realistic Pieces**: Algorithmically generated tabs and blanks using bezier curves
-4. **Smart Snapping**: 
-   - 50px threshold for snap detection
+4. **Smart Snapping**:
+   - 50px threshold for snap detection (⚠️ ISSUE: Too large, needs reduction)
    - Must be first piece OR edge piece OR have a placed neighbor
    - Visual feedback (green = can snap, red = cannot snap without neighbor)
+   - ⚠️ ISSUE: Green highlight reveals correct position when hovering, spoiling the puzzle
 5. **Timer**: Real-time tracking with MM:SS format
 6. **Progress**: Percentage-based completion indicator
 
@@ -105,7 +108,7 @@ image2puzzle/
 - **Corner Markers**: Enhanced visibility of puzzle boundaries
 - **Green Outline**: Correctly placed pieces
 - **Drag Shadow**: Visual depth during piece movement
-- **Snap Preview**: Green/red highlight based on connection rules
+- **Snap Preview**: Green/red highlight based on connection rules (⚠️ ISSUE: Reveals correct position)
 
 ## Technical Details
 
@@ -135,14 +138,14 @@ image2puzzle/
   - At least one interior piece guaranteed to have all 4 sides as inward blanks (quadruple blank piece)
   - Creates a unique "carved out" piece surrounded by tabs
   - Adds variety and visual interest to the puzzle
-- **Gap-Free Image Rendering**:
-  - Tab regions expand into neighboring piece image areas
-  - Separate X/Y scale factors preserve aspect ratios
-  - Completed puzzle displays seamlessly without gaps or misalignment
+- **Image Rendering** (⚠️ IN PROGRESS):
+  - Tab regions designed to expand into neighboring piece image areas
+  - Separate X/Y scale factors for aspect ratio preservation
+  - ⚠️ ISSUE: Currently not rendering complete image across piece - gaps visible in tabs/blanks
 
 ### Snap Logic Rules
 A piece can snap to its correct position when:
-1. It's within 50px of correct position AND
+1. It's within 50px of correct position (⚠️ ISSUE: This threshold is too large - needs reduction) AND
 2. One of these conditions:
    - It's the first piece being placed (placedCount === 0)
    - It's an edge piece (row/col === 0 or gridSize-1)
@@ -168,6 +171,7 @@ npm run preview   # Preview production build
 - **Build Command**: `npm run build`
 - **Publish Directory**: `dist`
 - **Redirects**: SPA redirect configured in netlify.toml
+- **Status**: ⚠️ Configured but NOT YET DEPLOYED
 
 ## Browser Compatibility
 - Chrome/Edge (recommended) - full support
@@ -175,13 +179,13 @@ npm run preview   # Preview production build
 - Safari - full support
 - Requires Canvas API support
 
-## Current State
-- Fully functional puzzle game with professional-quality piece shapes
+## Current Development State
+
+### Working Features
 - All difficulty levels working (3×3 to 6×6)
 - Realistic jigsaw pieces with "shoulders and head" bezier curve design
 - Four pattern variations creating natural puzzle piece diversity
 - Guaranteed quadruple inward blank piece for unique challenge
-- Gap-free image rendering with perfect alignment when completed
 - Snap logic with neighbor validation implemented
 - Pan/zoom navigation working smoothly
 - Timer and progress tracking active
@@ -189,6 +193,12 @@ npm run preview   # Preview production build
 - Touch support enabled for tablets/mobile
 - Keyboard shortcuts functional (Space, F, R)
 - Clean white text styling throughout UI
+
+### Known Issues (Pre-Production)
+1. **Image Rendering Incomplete**: Images not rendering across the entire puzzle piece - gaps or missing areas visible in tabs/blanks
+2. **Collision Assistant Too Revealing**: Green highlight appears when hovering near correct position, giving away the solution
+3. **Snap Distance Too Large**: 50px snap threshold is too generous - pieces snap together when too far apart, making puzzle too easy
+4. **Not Deployed**: Netlify configuration exists but site not yet published
 
 ## Known Behavior
 - First piece can be placed anywhere (no neighbor requirement)
