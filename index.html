@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>image2puzzle</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>image2puzzle</h1>
+      <div class="controls">
+        <button id="uploadBtn" class="btn btn-primary">Upload Image</button>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+        <select id="difficultySelect" class="select">
+          <option value="3">Easy (3×3)</option>
+          <option value="4" selected>Medium (4×4)</option>
+          <option value="5">Hard (5×5)</option>
+          <option value="6">Expert (6×6)</option>
+        </select>
+
+        <button id="shuffleBtn" class="btn" disabled>New Game</button>
+        <button id="referenceBtn" class="btn" disabled>View Reference</button>
+        <button id="panBtn" class="btn btn-icon" title="Pan Mode (Space)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/>
+          </svg>
+        </button>
+        <button id="fullscreenBtn" class="btn btn-icon" title="Fullscreen">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Timer and Stats -->
+    <div class="stats">
+      <div class="timer">
+        <span class="label">Time:</span>
+        <span id="timerDisplay">00:00</span>
+      </div>
+      <div class="progress">
+        <span class="label">Progress:</span>
+        <span id="progressDisplay">0%</span>
+      </div>
+    </div>
+
+    <!-- Canvas Container -->
+    <div id="canvasContainer" class="canvas-container">
+      <canvas id="puzzleCanvas"></canvas>
+      <div id="startMessage" class="start-message">
+        <h2>Welcome to image2puzzle!</h2>
+        <p>Upload an image to start playing</p>
+        <button class="btn btn-primary btn-large" onclick="document.getElementById('uploadBtn').click()">
+          Upload Image
+        </button>
+      </div>
+    </div>
+
+    <!-- Reference Image Modal -->
+    <div id="referenceModal" class="modal">
+      <div class="modal-content">
+        <button id="closeModal" class="btn btn-close">&times;</button>
+        <img id="referenceImage" src="" alt="Reference Image">
+      </div>
+    </div>
+
+    <!-- Victory Modal -->
+    <div id="victoryModal" class="modal">
+      <div class="modal-content victory-content">
+        <h2>Congratulations!</h2>
+        <p>You completed the puzzle!</p>
+        <div class="victory-stats">
+          <p>Time: <span id="finalTime"></span></p>
+        </div>
+        <button id="playAgainBtn" class="btn btn-primary">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

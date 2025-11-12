@@ -1,0 +1,24 @@
+{
+  "name": "image2puzzle",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Interactive puzzle game - turn any image into a puzzle with realistic interlocking pieces",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.1.7"
+  },
+  "keywords": [
+    "jigsaw",
+    "puzzle",
+    "game",
+    "canvas",
+    "javascript"
+  ],
+  "author": "",
+  "license": "MIT"
+}
