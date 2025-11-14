@@ -1,42 +1,24 @@
-// Multiple tab pattern variations for diverse puzzle piece shapes
+// ALL IDENTICAL patterns - big, round tabs for consistency
 // Each pattern uses 6 bezier curves normalized to 100-unit edge length
+// Currently ALL 8 patterns are IDENTICAL to test standardization
+const BASE_PATTERN = [
+  {cx1:0,  cy1:0,  cx2:34,cy2:14, ex:38, ey:5},
+  {cx1:38, cy1:5,  cx2:40,cy2:-1, ex:42, ey:-8},
+  {cx1:42, cy1:-8, cx2:25,cy2:-24,ex:50, ey:-24},
+  {cx1:50, cy1:-24,cx2:75,cy2:-24,ex:58, ey:-8},
+  {cx1:58, cy1:-8, cx2:60,cy2:-1, ex:62, ey:5},
+  {cx1:62, cy1:5,  cx2:66,cy2:14, ex:100,ey:0}
+];
+
 const TAB_PATTERNS = [
-  // Pattern 1: Classic "shoulders and head" (original)
-  [
-    {cx1:0,  cy1:0,  cx2:35,cy2:15, ex:37, ey:5},
-    {cx1:37, cy1:5,  cx2:40,cy2:0,  ex:38, ey:-5},
-    {cx1:38, cy1:-5, cx2:20,cy2:-20,ex:50, ey:-20},
-    {cx1:50, cy1:-20,cx2:80,cy2:-20,ex:62, ey:-5},
-    {cx1:62, cy1:-5, cx2:60,cy2:0,  ex:63, ey:5},
-    {cx1:63, cy1:5,  cx2:65,cy2:15, ex:100,ey:0}
-  ],
-  // Pattern 2: Wider base (broader shoulders)
-  [
-    {cx1:0,  cy1:0,  cx2:30,cy2:18, ex:35, ey:8},
-    {cx1:35, cy1:8,  cx2:38,cy2:2,  ex:40, ey:-8},
-    {cx1:40, cy1:-8, cx2:25,cy2:-22,ex:50, ey:-22},
-    {cx1:50, cy1:-22,cx2:75,cy2:-22,ex:60, ey:-8},
-    {cx1:60, cy1:-8, cx2:62,cy2:2,  ex:65, ey:8},
-    {cx1:65, cy1:8,  cx2:70,cy2:18, ex:100,ey:0}
-  ],
-  // Pattern 3: Narrow neck (more pronounced head)
-  [
-    {cx1:0,  cy1:0,  cx2:38,cy2:12, ex:40, ey:3},
-    {cx1:40, cy1:3,  cx2:42,cy2:-2, ex:42, ey:-7},
-    {cx1:42, cy1:-7, cx2:15,cy2:-25,ex:50, ey:-25},
-    {cx1:50, cy1:-25,cx2:85,cy2:-25,ex:58, ey:-7},
-    {cx1:58, cy1:-7, cx2:58,cy2:-2, ex:60, ey:3},
-    {cx1:60, cy1:3,  cx2:62,cy2:12, ex:100,ey:0}
-  ],
-  // Pattern 4: Rounded (smoother curves)
-  [
-    {cx1:0,  cy1:0,  cx2:32,cy2:16, ex:36, ey:6},
-    {cx1:36, cy1:6,  cx2:38,cy2:0,  ex:40, ey:-6},
-    {cx1:40, cy1:-6, cx2:30,cy2:-18,ex:50, ey:-18},
-    {cx1:50, cy1:-18,cx2:70,cy2:-18,ex:60, ey:-6},
-    {cx1:60, cy1:-6, cx2:62,cy2:0,  ex:64, ey:6},
-    {cx1:64, cy1:6,  cx2:68,cy2:16, ex:100,ey:0}
-  ]
+  BASE_PATTERN,
+  BASE_PATTERN,
+  BASE_PATTERN,
+  BASE_PATTERN,
+  BASE_PATTERN,
+  BASE_PATTERN,
+  BASE_PATTERN,
+  BASE_PATTERN
 ];
 
 // Puzzle Piece class with jigsaw shape generation
@@ -94,26 +76,33 @@ export class PuzzlePiece {
     // Cache for the piece path
     this.path = null;
     this.offscreenCanvas = null;
+
   }
 
   // Generate tabs - must be called after all pieces are created
   generateTabs(pieces) {
     const gridSize = this.gridSize;
 
-    // Right tab
+    // Right tab - CRITICAL: Both pieces must use the same pattern!
     if (this.col < gridSize - 1) {
       const rightPiece = pieces[this.row * gridSize + this.col + 1];
       const hasTab = Math.random() > 0.5;
       this.tabs.right = hasTab ? 1 : -1;
       rightPiece.tabs.left = hasTab ? -1 : 1;
+
+      // Coordinate pattern: right neighbor's left pattern must match our right pattern
+      rightPiece.tabPatterns.left = this.tabPatterns.right;
     }
 
-    // Bottom tab
+    // Bottom tab - CRITICAL: Both pieces must use the same pattern!
     if (this.row < gridSize - 1) {
       const bottomPiece = pieces[(this.row + 1) * gridSize + this.col];
       const hasTab = Math.random() > 0.5;
       this.tabs.bottom = hasTab ? 1 : -1;
       bottomPiece.tabs.top = hasTab ? -1 : 1;
+
+      // Coordinate pattern: bottom neighbor's top pattern must match our bottom pattern
+      bottomPiece.tabPatterns.top = this.tabPatterns.bottom;
     }
   }
 
@@ -222,7 +211,8 @@ export class PuzzlePiece {
   createOffscreenCanvas() {
     // New realistic tabs protrude about 20% of edge length (based on control points)
     const tabSize = Math.min(this.pieceWidth, this.pieceHeight) * 0.2;
-    const padding = tabSize * 1.2; // Extra padding to ensure tabs don't get clipped
+    // Increased padding to 2.0x to account for complex bezier curve shoulders/head extending beyond simple calculations
+    const padding = tabSize * 2.0;
 
     const canvas = document.createElement('canvas');
     canvas.width = this.pieceWidth + padding * 2;
@@ -235,78 +225,38 @@ export class PuzzlePiece {
     // Clip to piece shape
     ctx.clip(this.path);
 
-    // CORRECTED APPROACH FOR JIGSAW PIECE IMAGE RENDERING:
+    // TRANSLATE-CLIP-OFFSET PATTERN (Industry Standard)
     //
-    // The fundamental principle:
-    // - The base rectangle (0, 0, pieceWidth, pieceHeight) ALWAYS maps to (sourceX, sourceY, sourceWidth, sourceHeight)
-    // - Tabs extend BEYOND the base rectangle and need image from neighbor's area
-    // - Blanks are cut INTO the base rectangle (clipping handles this)
-    // - We must draw a larger image area to cover tabs, positioned so base rectangle aligns correctly
+    // Instead of complex source rectangle calculations, we:
+    // 1. Apply the clipping path (already done above)
+    // 2. Draw the ENTIRE puzzle image
+    // 3. Offset it so the correct portion shows through the clip
+    //
+    // This approach:
+    // - Eliminates complex scale factor calculations
+    // - Guarantees tabs always have image data (no clipping)
+    // - Lets Canvas transformation matrix handle alignment
+    // - Matches professional puzzle implementations
+    //
+    // The offset positions the full image so this piece's grid cell
+    // aligns with position (0, 0) in the current coordinate space
 
-    // Calculate scale factors (image pixels per canvas pixel)
-    const scaleX = this.image.width / this.puzzleWidth;
-    const scaleY = this.image.height / this.puzzleHeight;
+    const offsetX = -(this.col * this.pieceWidth);
+    const offsetY = -(this.row * this.pieceHeight);
 
-    // Calculate how much to expand the SOURCE image in each direction (in image pixels)
-    // Only expand for TABS (value = 1) because they extend into neighbor's image area
-    const expandLeftPx = (this.tabs.left === 1) ? tabSize * scaleX : 0;
-    const expandRightPx = (this.tabs.right === 1) ? tabSize * scaleX : 0;
-    const expandTopPx = (this.tabs.top === 1) ? tabSize * scaleY : 0;
-    const expandBottomPx = (this.tabs.bottom === 1) ? tabSize * scaleY : 0;
-
-    // Source rectangle with expansion (may go outside image bounds for edge pieces)
-    let srcX = this.sourceX - expandLeftPx;
-    let srcY = this.sourceY - expandTopPx;
-    let srcW = this.sourceWidth + expandLeftPx + expandRightPx;
-    let srcH = this.sourceHeight + expandTopPx + expandBottomPx;
-
-    // Destination position in piece coordinates (where to draw the expanded source)
-    // Start drawing from negative tab size to position tabs correctly
-    let destX = -expandLeftPx / scaleX;
-    let destY = -expandTopPx / scaleY;
-    let destW = srcW / scaleX;
-    let destH = srcH / scaleY;
-
-    // Clamp source to image boundaries and adjust destination accordingly
-    if (srcX < 0) {
-      const clampAmount = -srcX;
-      destX += clampAmount / scaleX;
-      srcW -= clampAmount;
-      destW -= clampAmount / scaleX;
-      srcX = 0;
-    }
-    if (srcY < 0) {
-      const clampAmount = -srcY;
-      destY += clampAmount / scaleY;
-      srcH -= clampAmount;
-      destH -= clampAmount / scaleY;
-      srcY = 0;
-    }
-    if (srcX + srcW > this.image.width) {
-      const excess = srcX + srcW - this.image.width;
-      srcW -= excess;
-      destW -= excess / scaleX;
-    }
-    if (srcY + srcH > this.image.height) {
-      const excess = srcY + srcH - this.image.height;
-      srcH -= excess;
-      destH -= excess / scaleY;
-    }
-
-    // Draw the image portion
-    // The clipping path (applied above) will cut to the exact piece shape
+    // Draw the entire puzzle image, offset to show the correct piece portion
     ctx.drawImage(
       this.image,
-      srcX, srcY, srcW, srcH,
-      destX, destY, destW, destH
+      offsetX, offsetY,
+      this.puzzleWidth, this.puzzleHeight
     );
 
     ctx.restore();
 
-    // Draw outline with slightly thicker line for realistic appearance
+    // Draw outline - thin black for realistic appearance
     ctx.translate(padding, padding);
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)'; // Semi-transparent black
+    ctx.lineWidth = 1; // Thin line
     ctx.stroke(this.path);
 
     this.offscreenCanvas = canvas;
@@ -340,13 +290,8 @@ export class PuzzlePiece {
       this.y - this.canvasPadding
     );
 
-    // Highlight if placed correctly
-    if (this.isPlaced) {
-      ctx.translate(this.x, this.y);
-      ctx.strokeStyle = 'rgba(34, 197, 94, 0.6)';
-      ctx.lineWidth = 3;
-      ctx.stroke(this.path);
-    } else if (this.isDragging && this.isNearCorrectPosition()) {
+    // Show snap feedback only when dragging
+    if (this.isDragging && this.isNearCorrectPosition()) {
       // Show green highlight when can snap, red when cannot
       ctx.translate(this.x, this.y);
       if (canSnap) {
@@ -376,7 +321,7 @@ export class PuzzlePiece {
   }
 
   // Check if piece is close to its correct position
-  isNearCorrectPosition(threshold = 50) {
+  isNearCorrectPosition(threshold = 25) {
     const dx = Math.abs(this.x - this.correctX);
     const dy = Math.abs(this.y - this.correctY);
     return dx < threshold && dy < threshold;

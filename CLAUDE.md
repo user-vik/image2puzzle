@@ -85,8 +85,8 @@ image2puzzle/
    - Hard (5×5 = 25 pieces)
    - Expert (6×6 = 36 pieces)
 3. **Realistic Pieces**: Algorithmically generated tabs and blanks using bezier curves
-4. **Smart Snapping**: 
-   - 50px threshold for snap detection
+4. **Smart Snapping**:
+   - 25px threshold for snap detection (reduced from 50px for tighter feel)
    - Must be first piece OR edge piece OR have a placed neighbor
    - Visual feedback (green = can snap, red = cannot snap without neighbor)
 5. **Timer**: Real-time tracking with MM:SS format
@@ -103,9 +103,8 @@ image2puzzle/
 ### Visual Design
 - **Dotted Puzzle Boundary**: Guide for correct placement area
 - **Corner Markers**: Enhanced visibility of puzzle boundaries
-- **Green Outline**: Correctly placed pieces
 - **Drag Shadow**: Visual depth during piece movement
-- **Snap Preview**: Green/red highlight based on connection rules
+- **Snap Preview**: Green/red highlight when dragging near correct position based on connection rules
 
 ## Technical Details
 
@@ -131,18 +130,19 @@ image2puzzle/
   - Pattern 3: Narrow neck with more pronounced head
   - Pattern 4: Rounded with smoother curves
   - Each piece side randomly selects one of 4 patterns for natural diversity
-- **Guaranteed Special Piece**:
-  - At least one interior piece guaranteed to have all 4 sides as inward blanks (quadruple blank piece)
-  - Creates a unique "carved out" piece surrounded by tabs
-  - Adds variety and visual interest to the puzzle
-- **Gap-Free Image Rendering**:
-  - Tab regions expand into neighboring piece image areas
+- **Special Pieces (In Development)**:
+  - Logic implemented to guarantee one interior piece with all 4 inward blanks (quadruple blank)
+  - Logic implemented to guarantee one piece with north and south outward tabs
+  - Console logging confirms generation, but visual verification pending
+  - **Status**: Code present but special pieces not clearly visible in gameplay
+- **Image Rendering**:
+  - Tab regions attempt to expand into neighboring piece image areas
   - Separate X/Y scale factors preserve aspect ratios
-  - Completed puzzle displays seamlessly without gaps or misalignment
+  - **Status**: Image clipping still occurring, expansion calculation needs refinement
 
 ### Snap Logic Rules
 A piece can snap to its correct position when:
-1. It's within 50px of correct position AND
+1. It's within 25px of correct position AND
 2. One of these conditions:
    - It's the first piece being placed (placedCount === 0)
    - It's an edge piece (row/col === 0 or gridSize-1)
@@ -180,9 +180,7 @@ npm run preview   # Preview production build
 - All difficulty levels working (3×3 to 6×6)
 - Realistic jigsaw pieces with "shoulders and head" bezier curve design
 - Four pattern variations creating natural puzzle piece diversity
-- Guaranteed quadruple inward blank piece for unique challenge
-- Gap-free image rendering with perfect alignment when completed
-- Snap logic with neighbor validation implemented
+- Snap logic with neighbor validation implemented (25px threshold)
 - Pan/zoom navigation working smoothly
 - Timer and progress tracking active
 - Victory detection and modal display
@@ -190,11 +188,50 @@ npm run preview   # Preview production build
 - Keyboard shortcuts functional (Space, F, R)
 - Clean white text styling throughout UI
 
+### In Progress / Needs Attention
+- Image clipping on puzzle pieces (visual quality issue)
+- Special piece generation verification (4 inward blanks, 2 outward N/S tabs)
+- Hover outline feedback (should not reveal piece locations)
+
 ## Known Behavior
 - First piece can be placed anywhere (no neighbor requirement)
 - Edge pieces can always be placed (they form the frame)
 - Interior pieces require at least one placed neighbor
 - This creates a natural progression: build edges first, then fill interior
+
+## Known Issues (Pending Resolution)
+
+### High Priority
+
+1. **Tab Size Inconsistency**
+   - **Issue**: Tabs are not the same size on all 4 sides of pieces
+   - **Impact**: Visual inconsistency, pieces don't have uniform appearance
+   - **Location**: `pieces.js:1-22` (TAB_PATTERNS constant)
+   - **Status**: All 8 patterns currently use identical BASE_PATTERN, but rendering shows variation
+   - **Notes**: May be related to pattern selection/caching or rendering pipeline issue
+
+2. **Tab Shape Not Round Enough**
+   - **Issue**: Tabs appear oblong rather than rounded
+   - **Impact**: Pieces don't match desired aesthetic (should be rounder, more traditional jigsaw shape)
+   - **Location**: `pieces.js:4-11` (BASE_PATTERN bezier curve definitions)
+   - **Status**: Current pattern uses -24 depth with specific control points
+   - **Notes**: Need to adjust bezier control points for rounder appearance
+
+3. **Limited Piece Variety Per Row**
+   - **Issue**: 4 out of 6 pieces in each row appear identical in configuration
+   - **Impact**: Puzzle lacks visual variety, pieces look repetitive
+   - **Location**: `puzzle.js:115-188` (generateAllTabs method with run-based algorithm)
+   - **Status**: Run-based algorithm implemented but not creating sufficient variety
+   - **Notes**: Console logging shows tab/blank patterns, but visual result shows repetition
+   - **Root Cause**: Pieces in same row share top/bottom edge values from neighboring rows, creating similar configurations
+
+### Recently Completed
+- ✅ **Image clipping FIXED**: Implemented Translate-Clip-Offset pattern with 2.0x padding
+- ✅ **Pieces fit together perfectly**: Fixed pattern coordination bug where neighbors used different patterns
+- ✅ **Removed special piece forcing**: Eliminated broken logic that created piece mismatches
+- ✅ **Snapping distance**: Reduced from 50px to 25px for tighter feel
+- ✅ **Thin black outlines**: Changed from thick debug outlines to subtle 1px lines
+- ✅ **Edge-based tab generation**: Refactored from cascading to independent edge generation
 
 ## Development Notes
 - No external dependencies beyond Vite for bundling

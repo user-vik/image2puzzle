@@ -99,38 +99,8 @@ export class PuzzleGame {
       }
     }
 
-    // Generate tabs for all pieces
-    this.pieces.forEach(piece => piece.generateTabs(this.pieces));
-
-    // Ensure at least one interior piece has all 4 inward blanks (all sides = -1)
-    // Find all interior pieces (not on any edge)
-    const interiorPieces = this.pieces.filter(p =>
-      p.row > 0 && p.row < gridSize - 1 &&
-      p.col > 0 && p.col < gridSize - 1
-    );
-
-    if (interiorPieces.length > 0) {
-      // Pick a random interior piece to have all blanks
-      const specialPiece = interiorPieces[Math.floor(Math.random() * interiorPieces.length)];
-
-      // Force all sides to be blanks (-1) and update neighbors to have tabs (1)
-      if (specialPiece.row > 0) {
-        specialPiece.tabs.top = -1;
-        this.pieces[(specialPiece.row - 1) * gridSize + specialPiece.col].tabs.bottom = 1;
-      }
-      if (specialPiece.col < gridSize - 1) {
-        specialPiece.tabs.right = -1;
-        this.pieces[specialPiece.row * gridSize + (specialPiece.col + 1)].tabs.left = 1;
-      }
-      if (specialPiece.row < gridSize - 1) {
-        specialPiece.tabs.bottom = -1;
-        this.pieces[(specialPiece.row + 1) * gridSize + specialPiece.col].tabs.top = 1;
-      }
-      if (specialPiece.col > 0) {
-        specialPiece.tabs.left = -1;
-        this.pieces[specialPiece.row * gridSize + (specialPiece.col - 1)].tabs.right = 1;
-      }
-    }
+    // Generate tabs using centralized edge-based approach for better variety
+    this.generateAllTabs(gridSize);
 
     // Create paths and offscreen canvases
     this.pieces.forEach(piece => piece.createPath());
@@ -138,6 +108,86 @@ export class PuzzleGame {
     this.shuffle();
     this.startTimer();
     this.render();
+  }
+
+  // Generate tabs for all pieces using run-based approach for natural variety
+  // Based on real puzzle analysis: uses runs/clusters instead of pure 50/50 random
+  generateAllTabs(gridSize) {
+    const TAB_PATTERN_COUNT = 8; // Number of patterns available
+
+    // Generate all HORIZONTAL edges (between columns) with RUN-BASED clustering
+    for (let row = 0; row < gridSize; row++) {
+      // Create a shuffled array of tab/blank values for this row
+      // This creates natural runs and variety within the row
+      const edgeCount = gridSize - 1;
+      const tabValues = [];
+
+      // Generate runs: alternate between tabs and blanks with varying lengths
+      let currentValue = Math.random() > 0.5 ? 1 : -1;
+      let runLength = 0;
+      for (let i = 0; i < edgeCount; i++) {
+        if (runLength === 0) {
+          // Start new run (1-3 edges with same value)
+          runLength = Math.floor(Math.random() * 3) + 1;
+          currentValue = Math.random() > 0.5 ? 1 : -1;
+        }
+        tabValues.push(currentValue);
+        runLength--;
+      }
+
+      // Apply the values to edges
+      for (let col = 0; col < gridSize - 1; col++) {
+        const leftPiece = this.pieces[row * gridSize + col];
+        const rightPiece = this.pieces[row * gridSize + (col + 1)];
+
+        const leftHasTab = tabValues[col] === 1;
+        leftPiece.tabs.right = leftHasTab ? 1 : -1;
+        rightPiece.tabs.left = leftHasTab ? -1 : 1;
+
+        // Coordinate pattern: both sides must use the same pattern
+        const sharedPattern = Math.floor(Math.random() * TAB_PATTERN_COUNT);
+        leftPiece.tabPatterns.right = sharedPattern;
+        rightPiece.tabPatterns.left = sharedPattern;
+      }
+
+      // Debug logging for row variety
+      console.log(`Row ${row} horizontal edges: ${tabValues.join(', ')}`);
+    }
+
+    // Generate all VERTICAL edges (between rows) with RUN-BASED clustering
+    for (let col = 0; col < gridSize; col++) {
+      // Create a shuffled array of tab/blank values for this column
+      const edgeCount = gridSize - 1;
+      const tabValues = [];
+
+      // Generate runs: alternate between tabs and blanks with varying lengths
+      let currentValue = Math.random() > 0.5 ? 1 : -1;
+      let runLength = 0;
+      for (let i = 0; i < edgeCount; i++) {
+        if (runLength === 0) {
+          // Start new run (1-3 edges with same value)
+          runLength = Math.floor(Math.random() * 3) + 1;
+          currentValue = Math.random() > 0.5 ? 1 : -1;
+        }
+        tabValues.push(currentValue);
+        runLength--;
+      }
+
+      // Apply the values to edges
+      for (let row = 0; row < gridSize - 1; row++) {
+        const topPiece = this.pieces[row * gridSize + col];
+        const bottomPiece = this.pieces[(row + 1) * gridSize + col];
+
+        const topHasTab = tabValues[row] === 1;
+        topPiece.tabs.bottom = topHasTab ? 1 : -1;
+        bottomPiece.tabs.top = topHasTab ? -1 : 1;
+
+        // Coordinate pattern: both sides must use the same pattern
+        const sharedPattern = Math.floor(Math.random() * TAB_PATTERN_COUNT);
+        topPiece.tabPatterns.bottom = sharedPattern;
+        bottomPiece.tabPatterns.top = sharedPattern;
+      }
+    }
   }
 
   shuffle() {

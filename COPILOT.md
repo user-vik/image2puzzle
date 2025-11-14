@@ -196,6 +196,40 @@ npm run preview   # Preview production build
 - Interior pieces require at least one placed neighbor
 - This creates a natural progression: build edges first, then fill interior
 
+## Known Issues (Pending Resolution)
+
+### High Priority
+
+1. **Tab Size Inconsistency**
+   - **Issue**: Tabs are not the same size on all 4 sides of pieces
+   - **Impact**: Visual inconsistency, pieces don't have uniform appearance
+   - **Location**: `pieces.js:1-22` (TAB_PATTERNS constant)
+   - **Status**: All 8 patterns currently use identical BASE_PATTERN, but rendering shows variation
+   - **Notes**: May be related to pattern selection/caching or rendering pipeline issue
+
+2. **Tab Shape Not Round Enough**
+   - **Issue**: Tabs appear oblong rather than rounded
+   - **Impact**: Pieces don't match desired aesthetic (should be rounder, more traditional jigsaw shape)
+   - **Location**: `pieces.js:4-11` (BASE_PATTERN bezier curve definitions)
+   - **Status**: Current pattern uses -24 depth with specific control points
+   - **Notes**: Need to adjust bezier control points for rounder appearance
+
+3. **Limited Piece Variety Per Row**
+   - **Issue**: 4 out of 6 pieces in each row appear identical in configuration
+   - **Impact**: Puzzle lacks visual variety, pieces look repetitive
+   - **Location**: `puzzle.js:115-188` (generateAllTabs method with run-based algorithm)
+   - **Status**: Run-based algorithm implemented but not creating sufficient variety
+   - **Notes**: Console logging shows tab/blank patterns, but visual result shows repetition
+   - **Root Cause**: Pieces in same row share top/bottom edge values from neighboring rows, creating similar configurations
+
+### Recently Completed
+- ✅ **Image clipping FIXED**: Implemented Translate-Clip-Offset pattern with 2.0x padding
+- ✅ **Pieces fit together perfectly**: Fixed pattern coordination bug where neighbors used different patterns
+- ✅ **Removed special piece forcing**: Eliminated broken logic that created piece mismatches
+- ✅ **Snapping distance**: Reduced from 50px to 25px for tighter feel
+- ✅ **Thin black outlines**: Changed from thick debug outlines to subtle 1px lines
+- ✅ **Edge-based tab generation**: Refactored from cascading to independent edge generation
+
 ## Development Notes
 - No external dependencies beyond Vite for bundling
 - Pure ES6 modules, no transpilation needed for modern browsers
